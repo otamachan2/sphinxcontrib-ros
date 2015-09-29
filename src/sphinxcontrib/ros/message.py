@@ -295,8 +295,11 @@ class ROSAutoType(ROSType):
 
         fields = self.type_file.parse(file_content, package_name)
 
+        # fields
+        field_comment_option = self.options.get('field-comment', '').encode('ascii').lower().split()
+        content = self.type_file.make_docfields(fields, field_comment_option)
+
         # description
-        content = StringList()
         if fields[0] and fields[0][0]:
             desc = fields[0][0].pre_comments
             desc_blocks = split_blocks(desc)
@@ -316,15 +319,12 @@ class ROSAutoType(ROSType):
                 blocks = desc_blocks[(int(first) if first else None):
                                      (int(second) if second else None)]
                 if blocks:
-                    content = join_blocks(blocks)
+                    description = join_blocks(blocks)
                     if 'quote' in description_option:
-                        align_strings(content, '| ')
+                        align_strings(description, '| ')
                     else:
-                        align_strings(content)
-        # fields
-        field_comment_option = self.options.get('field-comment', '').encode('ascii').lower().split()
-        docfields = self.type_file.make_docfields(fields, field_comment_option)
-        content = content + docfields
+                        align_strings(description)
+                    content = content + description
 
         content = content + self.content
         # raw file content

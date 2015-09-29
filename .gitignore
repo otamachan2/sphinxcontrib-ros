@@ -1,3 +1,7 @@
+# emacs
+*~
+\#*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -42,6 +46,7 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *,cover
+/cover
 
 # Translations
 *.mo
