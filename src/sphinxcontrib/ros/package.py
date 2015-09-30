@@ -18,7 +18,7 @@ from sphinx.util.docfields import Field
 from .base import ROSObjectDescription, GroupedFieldNoArg
 
 def default_formatter(value):
-    return [str(value)]
+    return [unicode(value)]
 
 def description_formatter(value):
     if '</a>' in value or '</p>' in value:
