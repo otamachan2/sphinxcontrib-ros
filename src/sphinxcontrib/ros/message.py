@@ -201,7 +201,7 @@ class ROSTypeFile(object):
         pre_comments = StringList()
         for item in file_content.xitems(): # (source, offset, value)
             line = item[2].strip()
-            if line == '---':
+            if  not [c for c in line if not c == '-']:
                 all_fields.append(fields)
                 fields = []
             elif line == '' or line[0] == '#':
@@ -219,7 +219,7 @@ class ROSTypeFile(object):
                     fields.append(new_field)
                     pre_comments = StringList()
                 else:
-                    # TODO
+                    # todo
                     print("?? <%s>" % line)
         all_fields.append(fields)
         return all_fields

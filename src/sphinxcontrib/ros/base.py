@@ -18,8 +18,6 @@ from sphinx.util.docfields import Field, GroupedField, TypedField
 
 from catkin_pkg.packages import find_packages
 
-_cache = {}
-
 class GroupedFieldNoArg(Field):
     u"""
     """
@@ -39,6 +37,7 @@ class GroupedFieldNoArg(Field):
 
 class ROSObjectDescription(ObjectDescription):
     u"""ROS Object"""
+    _ros_packages = {}
     def find_package(self, name):
         if 'base' in self.options and self.options['base'] is not None:
             base_abspath = self.env.relfn2path(self.options['base'])[1]
@@ -46,7 +45,7 @@ class ROSObjectDescription(ObjectDescription):
             package = next((package for package in packages.values()
                             if package.name == name), None)
         else:
-            if 'ros_packages' not in _cache:
+            if not ROSObjectDescription._ros_packages:
                 packages = {}
                 base_paths = self.env.config.ros_base_path
                 if not base_paths:
@@ -59,8 +58,8 @@ class ROSObjectDescription(ObjectDescription):
                     found_packages = find_packages(base_abspath)
                     for package in found_packages.values():
                         packages[package.name] = package
-                _cache['ros_packages'] = packages
-            package = _cache['ros_packages'].get(name, None)
+                ROSObjectDescription._ros_packages = packages
+            package = ROSObjectDescription._ros_packages.get(name, None)
         if not package:
             self.state_machine.reporter.warning(
                 'cannot find package %s' % name,
