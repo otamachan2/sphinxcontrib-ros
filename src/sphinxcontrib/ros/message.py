@@ -328,7 +328,7 @@ class ROSAutoType(ROSType):
                         align_strings(description, '| ')
                     else:
                         align_strings(description)
-                    content = content + description
+                    content = content + StringList([u'']) + description
 
         content = content + self.content
         # raw file content
@@ -339,8 +339,7 @@ class ROSAutoType(ROSType):
             code_block.extend(StringList(['    '+l for l in file_content.data],
                                          items=file_content.items))
             if raw_option == 'head':
-                code_block.append(StringList([u''])) # append empty line
-                content = code_block + content
+                content = code_block + StringList([u'']) + content
             elif raw_option == 'tail':
                 content = content + code_block
         return content
