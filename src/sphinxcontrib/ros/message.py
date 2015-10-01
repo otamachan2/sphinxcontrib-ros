@@ -137,35 +137,40 @@ class ROSFieldGroup(object):
             name = field.name + field.size
             desc = field.get_description(field_comment_option)
             if len(desc) == 0:
-                docfields.append(u':%s %s:' % (field_type, name),
+                docfields.append(u':{0} {1}:'.format(field_type, name),
                                  source=field.source, offset=field.offset)
             elif len(desc) == 1:
-                docfields.append(u':%s %s: %s' % (field_type, name, desc[0].strip()),
+                docfields.append(u':{0} {1}: {2}'.format(field_type, name, desc[0].strip()),
                                  source=desc.source(0), offset=desc.offset(0))
             elif len(desc) > 1:
                 if 'quote' in field_comment_option:
                     align_strings(desc, '  | ')
                 else:
                     align_strings(desc, '  ')
-                docfields.append(u':%s %s: %s' % (field_type, name, desc[0]),
+                docfields.append(u':{0} {1}: {2}'.format(field_type, name, desc[0]),
                                  source=desc.source(0), offset=desc.offset(0))
                 docfields.extend(desc[1:])
-            docfields.append(u':%s%s %s: %s' % (field_type, TYPE_SUFFIX, name, field.type),
+            docfields.append(u':{0}{1} {2}: {3}'.format(field_type, TYPE_SUFFIX, name, field.type),
                              source=field.source, offset=field.offset)
             if field.value:
-                docfields.append(u':%s%s %s: %s' % (field_type, VALUE_SUFFIX, name, field.value),
+                docfields.append(u':{0}{1} {2}: {3}'.format(field_type, VALUE_SUFFIX, name, field.value),
                                  source=field.source, offset=field.offset)
         return docfields
     def get_doc_field_types(self):
         return [
-            TypedField(self.field_name, label=l_(self.field_label),
+            TypedField(self.field_name,
+                       label=l_(self.field_label),
                        names=(self.field_name,),
-                       typerolename='msg', typenames=('%s-type' % self.field_name,)),
-            TypedField(self.constant_name, label=l_(self.constant_label),
+                       typerolename='msg',
+                       typenames=('{0}-type'.format(self.field_name))),
+            TypedField(self.constant_name,
+                       label=l_(self.constant_label),
                        names=(self.constant_name,),
-                       typerolename='msg', typenames=('%s-type' % self.constant_name,)),
-            GroupedField('%s-value' % self.constant_name, label=l_('%s (Value)' % self.constant_label),
-                         names=('%s-value' % self.constant_name,),
+                       typerolename='msg',
+                       typenames=('{0}-type'.format(self.constant_name))),
+            GroupedField('{0}-value'.format(self.constant_name),
+                         label=l_('{0} (Value)'.format(self.constant_label)),
+                         names=('{0}-value'.format(self.constant_name)),
                          rolename='msg'),
             ]
 
@@ -281,14 +286,13 @@ class ROSAutoType(ROSType):
         package_name, type_name = self.arguments[0].split('/', 1)
         package = self.find_package(package_name)
         if not package:
-            # TODO
-            print("package not found %s" % package)
             return
         file_path, file_content = self.type_file.read(os.path.dirname(package.filename),
                                                       type_name)
         if file_content is None:
-            # TODO
-            print("file not found %s" % file_path)
+            self.state_machine.reporter.warning(
+                'cannot find file {0}'.format(file_path),
+                line=self.lineno)
             return
         type_relfile = os.path.relpath(file_path, self.env.srcdir)
         self.env.note_dependency(type_relfile)
@@ -315,7 +319,7 @@ class ROSAutoType(ROSType):
                     elif option == 'quote':
                         pass
                     else:
-                        raise ValueError("unkonwn option %s in description option" % option)
+                        raise ValueError("unkonwn option {0} in description option".format(option))
                 blocks = desc_blocks[(int(first) if first else None):
                                      (int(second) if second else None)]
                 if blocks:
