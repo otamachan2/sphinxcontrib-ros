@@ -4,7 +4,7 @@ u"""
 
     The ROS domain.
 
-    :copyright: Copyright 2015 by otamachan.
+    :copyright: Copyright 2015 by Tamaki Nishino
     :license: BSD, see LICENSE for details.
 """
 from __future__ import print_function
@@ -69,7 +69,6 @@ class ROSDomain(Domain):
 
     def resolve_xref(self, env, fromdocname, builder, typ, target, node,
                      contnode):
-        #import pdb; pdb.set_trace()
         objects = self.data['objects']
         objtypes = self.objtypes_for_role(typ)
         for objtype in objtypes:

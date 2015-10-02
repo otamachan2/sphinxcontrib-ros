@@ -121,20 +121,7 @@ class ROSObjectDescription(ObjectDescription):
             src, srcline = self.content.info(lineno)
         return (src, srcline)
 
-    def find_field(self, node, field_type):
-        for child in node:
-            if isinstance(child, nodes.field_list):
-                for field in child:
-                    if isinstance(field, nodes.field):
-                        for field_type in self.doc_field_types:
-                            if field_type.label == field[0].astext() and \
-                               isinstance(field[1][0], nodes.bullet_list):
-                                field_list = {item[0][0].astext(): item[0]
-                                              for item in field[1][0]}
-                                # field_type -> (field, {list-item[0]: paragraph})
-                                fields[field_type.name] = (field, field_list)
-
-    def merge_field(self, src, dest):
+    def merge_field(self, src_node, dest_node):
         pass
 
     def run(self):
