@@ -11,8 +11,9 @@ u"""
 from __future__ import print_function
 
 from docutils.parsers.rst import directives
+from docutils import nodes
 from sphinx.locale import l_
-from sphinx.util.docfields import Field, GroupedField, TypedField
+from sphinx.util.docfields import GroupedField, TypedField
 
 from .base import ROSObjectDescription
 
@@ -55,3 +56,8 @@ class ROSAPI(ROSObjectDescription):
         'param-default': 'param',
         'param_set-default': 'param_set'
     }
+
+    def merge_field(self, src_node, dest_node):
+        dest_node.insert(4, nodes.Text(' (default: '))
+        dest_node.insert(5, nodes.literal('', src_node[2].astext()))
+        dest_node.insert(6, nodes.Text(')'))
