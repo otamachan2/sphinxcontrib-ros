@@ -38,6 +38,7 @@ class GroupedFieldNoArg(Field):
 class ROSObjectDescription(ObjectDescription):
     u"""ROS Object"""
     _ros_packages = {}
+    doc_merge_fields = {}
     def find_package(self, name):
         if 'base' in self.options and self.options['base'] is not None:
             base_abspath = self.env.relfn2path(self.options['base'])[1]
@@ -84,7 +85,7 @@ class ROSObjectDescription(ObjectDescription):
                 self.state_machine.reporter.warning(
                     'duplicate object description of %s, ' % name +
                     'other instance in ' +
-                    self.env.doc2path(objects[fullname][0]),
+                    self.env.doc2path(objects[fullname]),
                     line=self.lineno)
             objects[fullname] = self.env.docname
         indextext = _('%s (ROS %s)') % (name, self.objtype)
@@ -111,6 +112,7 @@ class ROSObjectDescription(ObjectDescription):
             self.state.reporter.get_source_and_line = self.tmp_backup['get_source_and_line']
     def update_content(self):
         return self.content
+
     def get_source_and_line(self, lineno=None):
         if lineno is None:
             srcline = None
@@ -118,3 +120,50 @@ class ROSObjectDescription(ObjectDescription):
         else:
             src, srcline = self.content.info(lineno)
         return (src, srcline)
+
+    def find_field(self, node, field_type):
+        for child in node:
+            if isinstance(child, nodes.field_list):
+                for field in child:
+                    if isinstance(field, nodes.field):
+                        for field_type in self.doc_field_types:
+                            if field_type.label == field[0].astext() and \
+                               isinstance(field[1][0], nodes.bullet_list):
+                                field_list = {item[0][0].astext(): item[0]
+                                              for item in field[1][0]}
+                                # field_type -> (field, {list-item[0]: paragraph})
+                                fields[field_type.name] = (field, field_list)
+
+    def merge_field(self, src, dest):
+        pass
+
+    def run(self):
+        node = ObjectDescription.run(self)
+        contentnode = node[1][-1]
+        # label is the key to find the field-value
+        labelmap = {field_type.name: unicode(field_type.label) # name -> label
+                    for field_type in self.doc_field_types}
+        field_nodes = {}
+        for child in contentnode:
+            if isinstance(child, nodes.field_list):
+                for field in child:
+                    if isinstance(field, nodes.field):
+                        field_nodes[field[0].astext()] = field # label -> field_node
+        # merge
+        for field_src, field_dest in self.doc_merge_fields.items():
+            # name -> label -> field_node
+            label_src = labelmap[field_src]
+            if label_src in field_nodes:
+                field_node_src = field_nodes[label_src]
+                label_dest = labelmap[field_dest]
+                if label_dest in field_nodes:
+                    field_node_dest = field_nodes[label_dest]
+                    for item_src in field_node_src[1][0]:
+                        name = item_src[0][0].astext()
+                        for item_dest in field_node_dest[1][0]:
+                            if name == item_dest[0][0].astext():
+                                self.merge_field(item_src[0], item_dest[0]) # first paragraph
+                for child in contentnode:
+                    if isinstance(child, nodes.field_list):
+                        child.remove(field_node_src)
+        return node

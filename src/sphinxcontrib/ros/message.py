@@ -28,8 +28,8 @@ from .base import ROSObjectDescription
 BUILTIN_TYPES = ('bool', 'byte',
                  'int8', 'uint8', 'int16', 'uint16', 'int32', 'uint32', 'int64', 'uint64',
                  'float32', 'float64', 'string', 'time', 'duration', 'Header')
-TYPE_SUFFIX = '-type'
-VALUE_SUFFIX = '-value'
+TYPE_SUFFIX = 'type'
+VALUE_SUFFIX = 'value'
 
 def split_blocks(strings):
     u"""Split StringList into list of StringList
@@ -150,10 +150,10 @@ class ROSFieldGroup(object):
                 docfields.append(u':{0} {1}: {2}'.format(field_type, name, desc[0]),
                                  source=desc.source(0), offset=desc.offset(0))
                 docfields.extend(desc[1:])
-            docfields.append(u':{0}{1} {2}: {3}'.format(field_type, TYPE_SUFFIX, name, field.type),
+            docfields.append(u':{0}-{1} {2}: {3}'.format(field_type, TYPE_SUFFIX, name, field.type),
                              source=field.source, offset=field.offset)
             if field.value:
-                docfields.append(u':{0}{1} {2}: {3}'.format(field_type, VALUE_SUFFIX, name, field.value),
+                docfields.append(u':{0}-{1} {2}: {3}'.format(field_type, VALUE_SUFFIX, name, field.value),
                                  source=field.source, offset=field.offset)
         return docfields
     def get_doc_field_types(self):
@@ -162,29 +162,37 @@ class ROSFieldGroup(object):
                        label=l_(self.field_label),
                        names=(self.field_name,),
                        typerolename='msg',
-                       typenames=('{0}-type'.format(self.field_name))),
+                       typenames=('{0}-{1}'.format(self.field_name, TYPE_SUFFIX),)),
             TypedField(self.constant_name,
                        label=l_(self.constant_label),
                        names=(self.constant_name,),
                        typerolename='msg',
-                       typenames=('{0}-type'.format(self.constant_name))),
-            GroupedField('{0}-value'.format(self.constant_name),
+                       typenames=('{0}-{1}'.format(self.constant_name, TYPE_SUFFIX),)),
+            GroupedField('{0}-{1}'.format(self.constant_name, VALUE_SUFFIX),
                          label=l_('{0} (Value)'.format(self.constant_label)),
-                         names=('{0}-value'.format(self.constant_name)),
-                         rolename='msg'),
+                         names=('{0}-{1}'.format(self.constant_name, VALUE_SUFFIX),)),
             ]
+    def get_doc_merge_fields(self):
+        return {'{0}-{1}'.format(self.constant_name, VALUE_SUFFIX):
+                self.constant_name}
 
 class ROSTypeFile(object):
-    def __init__(self, ext=None, types=None):
-        if types is None:
-            types = []
+    def __init__(self, ext=None, groups=None):
+        if groups is None:
+            groups = []
         self.ext = ext
-        self.types = types
+        self.groups = groups
 
     def get_doc_field_types(self):
         return [doc_field_type
-                for ros_type in self.types
-                for doc_field_type in ros_type.get_doc_field_types()]
+                for field_group in self.groups
+                for doc_field_type in field_group.get_doc_field_types()]
+
+    def get_doc_merge_fields(self):
+        doc_merge_fields = {}
+        for field_group in self.groups:
+            doc_merge_fields.update(field_group.get_doc_merge_fields())
+        return doc_merge_fields
 
     def read(self, package_path, ros_type):
         type_file = os.path.join(package_path,
@@ -231,8 +239,8 @@ class ROSTypeFile(object):
 
     def make_docfields(self, all_fields, field_comment_option):
         docfields = StringList()
-        for ros_type, fields in zip(self.types, all_fields):
-            docfields.extend(ros_type.make_docfields(fields, field_comment_option))
+        for field_group, fields in zip(self.groups, all_fields):
+            docfields.extend(field_group.make_docfields(fields, field_comment_option))
         return docfields
 
 class ROSType(ROSObjectDescription):
@@ -243,37 +251,9 @@ class ROSType(ROSObjectDescription):
         'description': directives.unchanged,
     }
 
-    def run(self):
-        node = ROSObjectDescription.run(self)
-        contentnode = node[1][-1]
-        fields = {}
-        # move constant value fields into constant type/desc field
-        for child in contentnode:
-            if isinstance(child, nodes.field_list):
-                for field in child:
-                    if isinstance(field, nodes.field):
-                        # search matched field_type in doc_field_types
-                        for field_type in self.doc_field_types:
-                            if field_type.label == field[0].astext() and \
-                               isinstance(field[1][0], nodes.bullet_list):
-                                field_list = {item[0][0].astext(): item[0]
-                                              for item in field[1][0]}
-                                # field_type -> (field, {list-item[0]: paragraph})
-                                fields[field_type.name] = (field, field_list)
-        constant_fields = [field_name for field_name in fields.keys()
-                           if field_name+VALUE_SUFFIX in fields]
-        for constant_field in constant_fields:
-            desc_field = fields[constant_field]
-            value_field = fields[constant_field+VALUE_SUFFIX]
-            for item_name in value_field[1]:
-                if item_name in desc_field[1]:
-                    desc_field[1][item_name].insert(4, nodes.Text(':'))
-                    desc_field[1][item_name].insert(5, nodes.literal('', value_field[1][item_name][2].astext()))
-            # remove value field
-            for child in contentnode:
-                if isinstance(child, nodes.field_list):
-                    child.remove(value_field[0])
-        return node
+    def merge_field(self, src_node, dest_node):
+        dest_node.insert(4, nodes.Text(':'))
+        dest_node.insert(5, nodes.literal('', src_node[2].astext()))
 
 class ROSAutoType(ROSType):
     option_spec = {
@@ -351,7 +331,7 @@ class ROSAutoType(ROSType):
 
 class ROSMessageBase(object):
     type_file = ROSTypeFile(ext='msg',
-                            types=[
+                            groups=[
                                 ROSFieldGroup(field_name='field',
                                               field_label='Field',
                                               constant_name='constant',
@@ -359,6 +339,7 @@ class ROSMessageBase(object):
                             ])
 
     doc_field_types = type_file.get_doc_field_types()
+    doc_merge_fields = type_file.get_doc_merge_fields()
 
 class ROSMessage(ROSMessageBase, ROSType):
     pass
@@ -368,7 +349,7 @@ class ROSAutoMessage(ROSMessageBase, ROSAutoType):
 
 class ROSServiceBase(object):
     type_file = ROSTypeFile(ext='srv',
-                            types=[
+                            groups=[
                                 ROSFieldGroup(field_name='req-field',
                                               field_label='Field (Request)',
                                               constant_name='req-constant',
@@ -380,6 +361,7 @@ class ROSServiceBase(object):
                             ])
 
     doc_field_types = type_file.get_doc_field_types()
+    doc_merge_fields = type_file.get_doc_merge_fields()
 
 class ROSService(ROSServiceBase, ROSType):
     pass
@@ -389,7 +371,7 @@ class ROSAutoService(ROSServiceBase, ROSAutoType):
 
 class ROSActionBase(object):
     type_file = ROSTypeFile(ext='action',
-                            types=[
+                            groups=[
                                 ROSFieldGroup(field_name='goal-field',
                                               field_label='Field (Goal)',
                                               constant_name='goal-constant',
@@ -405,6 +387,7 @@ class ROSActionBase(object):
                             ])
 
     doc_field_types = type_file.get_doc_field_types()
+    doc_merge_fields = type_file.get_doc_merge_fields()
 
 class ROSAction(ROSActionBase, ROSType):
     pass

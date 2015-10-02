@@ -46,11 +46,12 @@ class ROSAPI(ROSObjectDescription):
         TypedField('param_set', label=l_('Parameters Set'),
                    names=('param_set',),
                    typenames=('param_set-type',)),
-        GroupedField('param-default', label=l_('Parameter Default Values'),
+        GroupedField('param-default', label=l_('Parameters Default Value'),
                      names=('param-default',)),
+        GroupedField('param_set-default', label=l_('Parameters Set Default Value'),
+                     names=('param_set-default',)),
     ]
-
-#    def run(self):
-#        # call super class run
-#        node = ROSObjectDescription.run(self)
-#        return node
+    doc_merge_fields = {
+        'param-default': 'param',
+        'param_set-default': 'param_set'
+    }
