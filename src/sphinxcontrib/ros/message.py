@@ -214,7 +214,7 @@ class ROSTypeFile(object):
         pre_comments = StringList()
         for item in file_content.xitems(): # (source, offset, value)
             line = item[2].strip()
-            if  not [c for c in line if not c == '-']:
+            if  line and not [c for c in line if not c == '-']:
                 all_fields.append(fields)
                 fields = []
             elif line == '' or line[0] == '#':
@@ -248,7 +248,6 @@ class ROSType(ROSObjectDescription):
 
     option_spec = {
         'noindex': directives.flag,
-        'description': directives.unchanged,
     }
 
     def merge_field(self, src_node, dest_node):
@@ -258,6 +257,7 @@ class ROSType(ROSObjectDescription):
 class ROSAutoType(ROSType):
     option_spec = {
         'noindex': directives.flag,
+        'base': directives.path,
         'description': directives.unchanged,
         'raw': lambda x: directives.choice(x, ('head', 'tail')),
         'field-comment': directives.unchanged,
