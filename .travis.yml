@@ -10,4 +10,7 @@ env:
     - GH_REF: github.com/otamachan2/sphinxcontrib-ros-slide.git
     - secure: "HC9uaTRQ7MuQZkc51OQx+zR8daDlEHmB/D7FPPuqkq/72i3qSDssBGsmpvb6h9iEiAQWRtcobW5QMT67UkKWFR6f4TERLNSKQGQwXyF2q/6Bug9XAQhS8bsgbQIEO2wqP8P0DhUfSPNmjqR5UQaN0kOnaDIDqS291DFpytv7gwsOi0xdcikmY7xiVBz9K2fXQC+4v7XBGtZas3wQWnZqx22iUbGew90EgMVVDKlyn4atsIbPgGPMoh4hXAs+abodSoSjnDY8h3C8mR8PxLqnFIFZCFD35Vv6vlgQOUmxjZ+k1bZhxIxlRhJgBuuG93jdTE2NNiXYEzgxqMFjNa/1qhitvsZi3cNwbSAiwAf2IOrRb/lxATsoIRM3vxNBEbPUpfx3qXgWem8wccHGllwZMSI5vG5AkTilYvPwnlbPo2dVCasMKOCzzkKD0l1JgpHXSBp3+a+rTNXfnxW4vcV+W0biXsc9LM6eofoGN0k1MGG6aujmUUgxCoANt8IQ9fQ6x3hlfvaFcnQ41hKdXeuJVAyGXI+/OYpCDJlV+rMVW343FxS8Yej03sl4N6b8LF7oc6kbq9RDXBaL0RWyu1bHkG4rHy5u14t7iTAPE7F0bW5gTknLJ3D+mhVWAG5fIGg13VhzBBKpGFecZm+MdmxRRMT7T9jJYKJwPA/ygqyc+WE="
 install: 
-  - pip install -q -r requirements.txt
+  - pip install tox
+  - pip install -r requirements.txt
+script:
+  - tox
