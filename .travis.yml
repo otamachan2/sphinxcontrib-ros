@@ -16,7 +16,7 @@ script:
   - tox
   - cd doc
   - make html
-after_sucess:
+after_success:
   - cd _build/html
   - git init
   - git add .
