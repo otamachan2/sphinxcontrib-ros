@@ -7,7 +7,7 @@ branches:
     - master
 env:
   global:
-    - GH_REF: github.com/otamachan2/sphinxcontrib-ros-slide.git
+    - GH_REF: github.com/otamachan2/sphinxcontrib-ros.git
     - secure: "WeAiAxPhpXXlGhTnYhtRUHkH+XAqCBLsRlZpL6i3SGp5IL2b2SZSPNSO6jOQsPTi/+GK+6SiB7eRo3EDC/krVXCY4muq94UWRSwm8I3nSVph8MCMa21NLsXl4A3od7J0TgczAKqZzj3exEvFzJDHbgPiHCSEPh1wY6pd9igVmXwbEmtdDOBDZSxGVD5garrgQkaM34plWf5l4Iil4bssu5572kIV1+i2aJBLjYpLR1O/Bux0nNE+7IdwAeVr7MvYQJcbvDgaBySY0Pc4UGvLYWO/adFsI25yrWj8ij+bnMKVYRW1GQKHSzRFsjH/u5BKf6OnuQdoMJNK+wjHMNSktsuoQyD1GG/LF4XBi0/eEmzeAZ8dkSlglIwHCNTbNI74dkMz1KBNTZMshcsABKtoAA5q4HYJwEm484rc+q/7/yFaIvzCjR0I/5cA52sI4kQyHxKVYBWZjQKnTHmX37N+nSxxmR7dBbL3oXGR5i38y4mz53MCrZk/A+075KP6Fek/Ne11I0/8HZZqVksx+ZNcTBGOtZp/4TFAFPvTW7KzaWqNjfcsgK918JdyqAzT9FB+JY9DgfH92v/I6QBgxKsaF/QYZ1IWFOem6RvECWQM/oVUb9Q+qL1pr/MEb4qlzfrExswfZ74gWMBVJ8S4Qqj4ICJAnTXjjFNtokO8JZDnKKo="
 install:
   - pip install tox
