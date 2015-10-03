@@ -10,17 +10,15 @@ u"""
 from __future__ import print_function
 
 from sphinx.domains import Domain, ObjType
-from sphinx.locale import l_, _
+from sphinx.locale import l_
 from sphinx.roles import XRefRole
 from sphinx.util.nodes import make_refnode
 
-from pygments.lexer import RegexLexer, include, bygroups
-from pygments.token import Punctuation, Literal, \
-     Text, Comment, Operator, Name, Number, Keyword
-
 from .package import ROSPackage, ROSAutoPackage, add_formatter
-from .message  import ROSMessage, ROSAutoMessage, ROSService, ROSAutoService, ROSAction, ROSAutoAction, ROSTypeLexer
+from .message import (ROSMessage, ROSAutoMessage, ROSService,
+                      ROSAutoService, ROSAction, ROSAutoAction, ROSTypeLexer)
 from .api import ROSAPI
+
 
 class ROSDomain(Domain):
     u"""
@@ -95,6 +93,7 @@ class ROSDomain(Domain):
         for (typ, name), docname in self.data['objects'].items():
             yield name, name, typ, docname, typ + '-' + name, 1
 
+
 def setup(app):
     u"""
     setup
@@ -122,3 +121,7 @@ def setup(app):
     app.add_domain(ROSDomain)
     app.add_lexer("rostype", ROSTypeLexer())
     return {'version': '0.1.0', 'parallel_read_safe': True}
+
+__all__ = [
+    'add_formatter'
+]

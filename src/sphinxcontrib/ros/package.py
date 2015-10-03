@@ -17,8 +17,10 @@ from sphinx.util.docfields import Field
 
 from .base import ROSObjectDescription, GroupedFieldNoArg
 
+
 def default_formatter(value):
     return [unicode(value)]
+
 
 def description_formatter(value):
     if '</a>' in value or '</p>' in value:
@@ -27,8 +29,10 @@ def description_formatter(value):
         content = default_formatter(value)
     return content
 
+
 def url_formatter(url):
     return [url.type + '<' + url.url + '>']
+
 
 def person_formatter(person):
     replaces = {'@': ' AT ', '.': ' DOT '}
@@ -41,6 +45,7 @@ def person_formatter(person):
         content = person.name
     return [content]
 
+
 def depend_formatter(depend):
     return [':ros:pkg:`{0}`'.format(depend.name)]
 
@@ -52,9 +57,11 @@ FORMATTERS = {
     'depend_formatter': depend_formatter
 }
 
+
 def add_formatter(formatter_name, formatter):
     global FORMATTERS
     FORMATTERS[formatter_name] = formatter
+
 
 def format_attr(package, attr, formatter_name='default_formatter'):
     value = getattr(package, attr, None)
@@ -71,6 +78,7 @@ def format_attr(package, attr, formatter_name='default_formatter'):
             field_content.append(field_header)
             field_content.extend(['   '+line for line in formatter(value)])
         return StringList(field_content)
+
 
 # http://www.ros.org/reps/rep-0127.html
 class ROSPackage(ROSObjectDescription):
@@ -97,12 +105,14 @@ class ROSPackage(ROSObjectDescription):
     )
     doc_field_types = [
         GroupedFieldNoArg(attr[:-1],
-                          label=l_(''.join(w.title() for w in attr.split('_'))),
+                          label=l_(''.join(w.title()
+                                           for w in attr.split('_'))),
                           names=(attr[:-1],))
         if attr.endswith('s') else
         Field(attr, label=l_(attr.title()), names=(attr,), has_arg=False)
         for attr in package_attrs
     ]
+
 
 class ROSAutoPackage(ROSPackage):
     option_spec = {
@@ -117,6 +127,7 @@ class ROSAutoPackage(ROSPackage):
         'conflicts': 'depend_formatter',
         'replaces': 'depend_formatter',
     }
+
     def update_content(self):
         package_name = self.arguments[0]
         package = self.find_package(package_name)
@@ -138,6 +149,7 @@ class ROSAutoPackage(ROSPackage):
         if len(content) > 0:
             content.append(StringList([u'']))
         return content + self.content
+
     def run(self):
         self.name = self.name.replace('auto', '')
         return ROSPackage.run(self)

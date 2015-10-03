@@ -14,9 +14,10 @@ from docutils import nodes
 from sphinx import addnodes
 from sphinx.directives import ObjectDescription
 from sphinx.locale import _
-from sphinx.util.docfields import Field, GroupedField, TypedField
+from sphinx.util.docfields import Field
 
 from catkin_pkg.packages import find_packages
+
 
 class GroupedFieldNoArg(Field):
     u"""
@@ -35,10 +36,12 @@ class GroupedFieldNoArg(Field):
         fieldbody = nodes.field_body('', listnode)
         return nodes.field('', fieldname, fieldbody)
 
+
 class ROSObjectDescription(ObjectDescription):
     u"""ROS Object"""
     _ros_packages = {}
     doc_merge_fields = {}
+
     def find_package(self, name):
         if 'base' in self.options and self.options['base'] is not None:
             base_abspath = self.env.relfn2path(self.options['base'])[1]
@@ -92,24 +95,32 @@ class ROSObjectDescription(ObjectDescription):
         self.indexnode['entries'].append(('single', indextext,
                                           targetname,
                                           ''))
+
     def before_content(self):
         content = self.update_content()
         if content:
             self.content = content
             # save
-            self.tmp_backup = {'content_offset': self.content_offset,
-                               'input_lines': self.state.state_machine.input_lines,
-                               'get_source_and_line': self.state.reporter.get_source_and_line}
+            self.tmp_backup = {'content_offset':
+                               self.content_offset,
+                               'input_lines':
+                               self.state.state_machine.input_lines,
+                               'get_source_and_line':
+                               self.state.reporter.get_source_and_line}
             # overwrite variables to deal with source lines properly
             self.content_offset = 0
             self.state.state_machine.input_lines = self.content
             self.state.reporter.get_source_and_line = self.get_source_and_line
+
     def after_content(self):
         if hasattr(self, 'tmp_backup'):
             # restore
             self.content_offset = self.tmp_backup['content_offset']
-            self.state.state_machine.input_lines = self.tmp_backup['input_lines']
-            self.state.reporter.get_source_and_line = self.tmp_backup['get_source_and_line']
+            self.state.state_machine.input_lines \
+                = self.tmp_backup['input_lines']
+            self.state.reporter.get_source_and_line \
+                = self.tmp_backup['get_source_and_line']
+
     def update_content(self):
         return self.content
 
@@ -128,14 +139,15 @@ class ROSObjectDescription(ObjectDescription):
         node = ObjectDescription.run(self)
         contentnode = node[1][-1]
         # label is the key to find the field-value
-        labelmap = {field_type.name: unicode(field_type.label) # name -> label
+        labelmap = {field_type.name: unicode(field_type.label)  # name -> label
                     for field_type in self.doc_field_types}
         field_nodes = {}
         for child in contentnode:
             if isinstance(child, nodes.field_list):
                 for field in child:
                     if isinstance(field, nodes.field):
-                        field_nodes[field[0].astext()] = field # label -> field_node
+                        # label -> field_node
+                        field_nodes[field[0].astext()] = field
         # merge
         for field_src, field_dest in self.doc_merge_fields.items():
             # name -> label -> field_node
@@ -149,7 +161,9 @@ class ROSObjectDescription(ObjectDescription):
                         name = item_src[0][0].astext()
                         for item_dest in field_node_dest[1][0]:
                             if name == item_dest[0][0].astext():
-                                self.merge_field(item_src[0], item_dest[0]) # first paragraph
+                                # merge first paragraph
+                                self.merge_field(item_src[0],
+                                                 item_dest[0])
                 for child in contentnode:
                     if isinstance(child, nodes.field_list):
                         child.remove(field_node_src)
