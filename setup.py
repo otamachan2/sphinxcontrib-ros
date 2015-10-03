@@ -3,6 +3,16 @@ import sys
 from setuptools import setup, find_packages
 
 classifiers = [
+    'Development Status :: 3 - Alpha',
+    'Environment :: Console',
+    'Environment :: Web Environment',
+    'Framework :: Sphinx :: Extension',
+    'License :: OSI Approved :: BSD License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Topic :: Documentation',
+    'Topic :: Documentation :: Sphinx',
+    'Topic :: Utilities'
 ]
 
 install_requires = [
@@ -17,16 +27,18 @@ if sys.version_info < (3, 3):
 
 setup(
     name='sphinxcontrib-ros',
-    version='0.1.0',
-    description='Sphinx extension for ROS(Robot Operating System)',
-    classifiers=classifiers,
-    keywords=['sphinx', 'ros'],
-    author='otamachan',
-    author_email='otamachan at gmail.com',
+    version='0.0.1',
     url='https://github.com/otamachan/sphinxcontrib-ros.git',
+    license='BSD',
+    description='Sphinx extension for ROS(Robot Operating System) documentation',
+    long_description=open("README.rst").read(),
+    classifiers=classifiers,
+    author='Tamaki Nishino',
+    author_email='otamachan at gmail.com',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     include_package_data=True,
     install_requires=install_requires,
     tests_require=test_require,
+    namespace_packages=['sphinxcontrib'],
 )
